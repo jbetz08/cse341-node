@@ -1,9 +1,6 @@
 const mongodb = require('../db/connect');
 const ObjectId = require('mongodb').ObjectId;
 
-
-
-
 const findAllContacts = async (req, res) => {
     const result = await mongodb.getDb().db().collection('contacts').find();
     result.toArray().then((lists) => {
@@ -11,7 +8,6 @@ const findAllContacts = async (req, res) => {
         res.status(200).json(lists);
     });
 };
-
 
 const findOneContact = async (req, res) => {
     const userId = new ObjectId(req.params.id);
@@ -21,24 +17,6 @@ const findOneContact = async (req, res) => {
         res.status(200).json(lists[0]);
     });
 };
-
-
-
-// const createContact = async (req, res) => {
-//     const contact = {
-//       firstName: req.body.firstName,
-//       lastName: req.body.lastName,
-//       email: req.body.email,
-//       favoriteColor: req.body.favoriteColor,
-//       birthday: req.body.birthday
-//     };
-//     const response = await mongodb.getDb().db().collection('contacts').insertOne(contact);
-//     if (response.acknowledged) {
-//       res.status(201).json(response);
-//     } else {
-//       res.status(500).json(response.error || 'Some error occurred while creating the contact.');
-//     }
-//   };
 
 const createOneContact = async (req, res) => {
     const contact = {
@@ -56,21 +34,42 @@ const createOneContact = async (req, res) => {
     }
 };
 
-async function createNewContact(client, contact) {
-    const result = await client.db("341db").collection("contacts").insertOne(contact);
+const updateWholeContact = async (req, res) => {
+    const userId = new Object(req.params.id);
+    const contact = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        favoriteColor: req.body.favoriteColor,
+        birthday: req.body.birthday
+    };
 
-    console.log(`New contact created with the following ID: ${result.insertedId}`);
-}
+    const response = await mongodb.getDb().db().collection('contacts').replaceOne({ _id: userId }, contact);
 
-async function updateContactById(client, id, updatedContact) {
-    const result = await client.db("341db").collection("contacts").updateOne({ '_id': ObjectId(id) }, { $set: updatedContact });
+    console.log(response);
+    if (response.modifiedCount > 0) {
+        res.status(204).send();
+    } else {
+        res.status(500).json(response.error || 'Some error occurred while updating contact.');
+    }
+};
 
-    console.log(`Status: ${result.status}.send()`);
-}
+const deleteWholeContact = async (req, res) => {
+    const userId = new ObjectId(req.params.id);
+    const response = await mongodb.getDb().db().collection('contacts').remove({ _id: userId }, true);
+    console.log(response);
+    if (response.deletedCount > 0) {
+        res.status(204).send();
+    } else {
+        res.status(500).json(response.error || 'Some error occured while deleting the contact.');
+    }
+};
 
-async function deleteContactByName(client, name) {
-    const result = await client.db("341db").collection("contacts").deleteOne({fistName: name});
 
-    console.log(`Status: ${result.httpStatus}`);
-
-}
+module.exports = {
+    findAllContacts,
+    findOneContact,
+    createOneContact,
+    updateWholeContact,
+    deleteWholeContact
+};
