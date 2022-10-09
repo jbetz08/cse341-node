@@ -5,9 +5,10 @@
     "description": "Description",
     "version": "1.0.0"
   },
-  "host": "localhost:8080",
+  "host": "",
   "basePath": "/",
   "schemes": [
+    "https",
     "http"
   ],
   "paths": {
